@@ -78,23 +78,18 @@
             <div class="card card-filter h-100 p-3">
                 <form action="product" method="get" class="mb-0">
                     <input type="hidden" name="action" value="ordered-by-date">
-                    <label class="form-label fw-bold text-secondary text-uppercase small">Sản phẩm được đặt hàng theo
-                        thời gian</label>
+                    <label class="form-label fw-bold text-secondary text-uppercase small">Lọc theo khoảng thời
+                        gian</label>
                     <div class="row g-2">
-                        <div class="col-5">
-                            <select name="month" class="form-select" required>
-                                <option value="">Chọn Tháng...</option>
-                                <c:forEach var="m" begin="1" end="12">
-                                    <option value="${m}" ${param.month == m ? 'selected' : ''}>Tháng ${m}</option>
-                                </c:forEach>
-                            </select>
+                        <div class="col-4">
+                            <input type="date" name="fromDate" class="form-control" value="${param.fromDate}" required>
                         </div>
                         <div class="col-4">
-                            <input type="number" name="year" class="form-control" placeholder="Năm..." min="2000"
-                                   max="2100" value="${param.year != null ? param.year : '2026'}" required>
+                            <input type="date" name="toDate" class="form-control" value="${param.toDate}" required>
                         </div>
-                        <div class="col-3">
+                        <div class="col-4">
                             <button type="submit" class="btn btn-success w-100"><i class="fa-solid fa-filter me-1"></i>Lọc
+                                dữ liệu
                             </button>
                         </div>
                     </div>
@@ -110,7 +105,8 @@
                     <i class="fa-solid fa-list-ol me-2 text-danger"></i>Danh sách ${param.limit} sản phẩm bán chạy nhất
                 </c:when>
                 <c:when test="${param.action == 'ordered-by-date'}">
-                    <i class="fa-solid fa-calendar-check me-2 text-success"></i>Danh sách sản phẩm được đặt hàng trong: Tháng ${param.month} / Năm ${param.year}
+                    <i class="fa-solid fa-calendar-check me-2 text-success"></i>Danh sách sản phẩm được đặt hàng từ ngày
+                    <strong>${param.fromDate}</strong> đến <strong>${param.toDate}</strong>
                 </c:when>
                 <c:otherwise>
                     <i class="fa-solid fa-boxes-stacked me-2 text-primary"></i>Danh sách toàn bộ sản phẩm hiện có
@@ -129,6 +125,12 @@
                     <th class="text-end">Giá niêm yết</th>
                     <th class="text-center">Mức giảm giá</th>
                     <th class="text-center">Số lượng tồn kho</th>
+                    <c:if test="${param.action == 'top-selling'}">
+                        <th class="text-center text-danger"><i class="fa-solid fa-fire"></i> Số lần đặt</th>
+                    </c:if>
+                    <c:if test="${param.action == 'ordered-by-date'}">
+                        <th class="text-center text-success"><i class="fa-solid fa-cart-shopping"></i> SL Đã bán</th>
+                    </c:if>
                 </tr>
                 </thead>
                 <tbody>
@@ -144,9 +146,9 @@
                                 </td>
                                 <td class="text-center">
                                     <c:if test="${product.discount > 0}">
-                                            <span class="badge bg-danger-subtle text-danger px-2.5 py-1.5 rounded">
-                                                <i class="fa-solid fa-arrow-down-long me-1"></i>-${product.discount}%
-                                            </span>
+                            <span class="badge bg-danger-subtle text-danger px-2.5 py-1.5 rounded">
+                                <i class="fa-solid fa-arrow-down-long me-1"></i>-${product.discount}%
+                            </span>
                                     </c:if>
                                     <c:if test="${product.discount == 0}">
                                         <span class="text-muted">-</span>
@@ -162,12 +164,24 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
+                                <c:if test="${param.action == 'top-selling'}">
+                                    <td class="text-center fw-bold text-danger bg-danger-subtle">
+                                            ${product.totalOrders} lần
+                                    </td>
+                                </c:if>
+
+                                <c:if test="${param.action == 'ordered-by-date'}">
+                                    <td class="text-center fw-bold text-success bg-success-subtle">
+                                            ${product.totalQuantity} chiếc
+                                    </td>
+                                </c:if>
                             </tr>
                         </c:forEach>
                     </c:when>
                     <c:otherwise>
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
+                            <td colspan="${(param.action == 'top-selling' or param.action == 'ordered-by-date') ? 6 : 5}"
+                                class="text-center py-5 text-muted">
                                 <i class="fa-solid fa-inbox fa-3x mb-3 text-light"></i>
                                 <p class="mb-0">Không có dữ liệu hiển thị cho điều kiện lọc hiện tại.</p>
                             </td>
